@@ -5,18 +5,17 @@ Reusable development infrastructure for VS Code extensions.
 ## Install directly from GitHub
 
 The package does not need to be published to npm before another extension can
-use it. Pin a commit for reproducible installs:
+use it. Follow `main` while developing:
 
 ```json
 {
   "devDependencies": {
-    "@moyarich/vscode-dev-toolkit": "git+https://github.com/moyarich/vscode-dev-toolkit.git#0cebda5b05096e5d6560eb6f40044878514a53eb"
+    "@moyarich/vscode-dev-toolkit": "github:moyarich/vscode-dev-toolkit#main"
   }
 }
 ```
 
-Use `#main` instead when you intentionally want installs to follow the latest
-commit on the default branch.
+For reproducible installs, replace `#main` with an exact commit SHA.
 
 The toolkit centralizes the machinery that should not be copied into every
 extension package:
