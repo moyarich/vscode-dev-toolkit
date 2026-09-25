@@ -1,0 +1,320 @@
+/*
+ * ==========================================================
+ * Cursor magnifier
+ * Source inspiration:
+
+ * https://dev.to/eitanwaxman/magnifying-glass-for-text-and-more-5a57
+ * https://codepen.io/eitanwaxman/pen/rNdjaQO
+ * ==========================================================
+ */
+
+:host {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  overflow: visible;
+  background: transparent;
+  pointer-events: none;
+  --cursor-size: 85px;
+  --cursor-scale: 1.5;
+
+  --cursor-border-width: 2px;
+  --cursor-border-color: #30394d;
+
+  --cursor-background: #eef2f8ce;
+
+  --cursor-halo-gap: 4px;
+  --cursor-halo-width: 4px;
+  --cursor-halo-color: rgb(255 255 255 / 85%);
+
+  --cursor-shadow:
+    0 10px 35px rgb(15 23 42 / 28%), inset 0 0 0 1px rgb(255 255 255 / 22%);
+
+  --cursor-glass-highlight:
+    radial-gradient(
+      circle at 30% 24%,
+      rgb(255 255 255 / 24%),
+      rgb(255 255 255 / 5%) 24%,
+      transparent 43%
+    ),
+    linear-gradient(145deg, rgb(255 255 255 / 10%), transparent 42%);
+
+  /*
+   * Mirrored native-selection color.
+   */
+  --cursor-selection-background: rgb(0 120 215 / 35%);
+}
+
+/*
+ * ==========================================================
+ * Cursor
+ * ==========================================================
+ *
+ * The entire cursor is visual-only.
+ *
+ * pointer-events:none means mouse interaction and native text
+ * selection continue to happen on the real page underneath.
+ */
+
+.cursor {
+  position: fixed;
+  z-index: 2147483647;
+
+  top: 0;
+  left: 0;
+
+  width: var(--cursor-size);
+  height: var(--cursor-size);
+
+  box-sizing: border-box;
+
+  /*
+   * Keep overflow visible here because ::after creates the
+   * halo outside the cursor.
+   *
+   * .cursor__content performs the circular clipping.
+   */
+  overflow: visible;
+
+  border: var(--cursor-border-width) solid var(--cursor-border-color);
+
+  border-radius: 50%;
+
+  background: var(--cursor-background);
+
+  box-shadow: var(--cursor-shadow);
+
+  /*
+   * JS places left/top directly at clientX/clientY.
+   */
+  translate: -50% -50%;
+
+  opacity: 0;
+
+  pointer-events: none;
+
+  user-select: none;
+  -webkit-user-select: none;
+
+  mix-blend-mode: normal;
+
+  isolation: isolate;
+
+  will-change: left, top, opacity;
+}
+
+.cursor.visible {
+  opacity: 1;
+}
+
+/*
+ * ==========================================================
+ * Circular magnified viewport
+ * ==========================================================
+ */
+
+.cursor__content {
+  position: absolute;
+  z-index: 1;
+
+  inset: 0;
+
+  overflow: hidden;
+
+  border-radius: inherit;
+
+  margin: 0;
+  padding: 0;
+
+  pointer-events: none;
+
+  user-select: none;
+  -webkit-user-select: none;
+
+  contain: paint;
+}
+
+/*
+ * ==========================================================
+ * Cloned source
+ * ==========================================================
+ *
+ * The clone is purely visual.
+ */
+
+.cursor__clone {
+  position: absolute !important;
+
+  top: 0 !important;
+  left: 0 !important;
+
+  margin: 0 !important;
+
+  max-width: none !important;
+  max-height: none !important;
+
+  transform-origin: 0 0 !important;
+
+  pointer-events: none !important;
+
+  user-select: none !important;
+  -webkit-user-select: none !important;
+
+  will-change: transform;
+}
+
+.cursor__clone * {
+  pointer-events: none !important;
+
+  user-select: none !important;
+  -webkit-user-select: none !important;
+}
+
+/*
+ * Prevent recursively displaying the cursor if a selected
+ * source subtree somehow contains it.
+ */
+.cursor__clone .cursor {
+  display: none !important;
+}
+
+/*
+ * ==========================================================
+ * Mirrored selection layer
+ * ==========================================================
+ *
+ * Native selection remains on the original DOM.
+ *
+ * JS reads Range.getClientRects() from that native selection
+ * and recreates those rectangles here.
+ */
+
+.cursor__selection-layer {
+  position: absolute;
+  z-index: 2;
+
+  top: 0;
+  left: 0;
+
+  width: 0;
+  height: 0;
+
+  overflow: visible;
+
+  pointer-events: none;
+
+  transform-origin: 0 0;
+
+  will-change: transform;
+}
+
+.cursor__selection-rect {
+  position: absolute;
+
+  box-sizing: border-box;
+
+  background: var(--cursor-selection-background);
+
+  pointer-events: none;
+}
+
+/*
+ * ==========================================================
+ * Glass reflection
+ * ==========================================================
+ *
+ * Drawn above both the clone and mirrored selection.
+ */
+
+.cursor::before {
+  content: "";
+
+  position: absolute;
+  z-index: 3;
+
+  inset: 1px;
+
+  border-radius: inherit;
+
+  background: var(--cursor-glass-highlight);
+
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 28%);
+
+  pointer-events: none;
+}
+
+/*
+ * ==========================================================
+ * Halo
+ * ==========================================================
+ */
+
+.cursor::after {
+  content: "";
+
+  position: absolute;
+  z-index: 4;
+
+  inset: calc(-1 * var(--cursor-halo-gap));
+
+  box-sizing: border-box;
+
+  border: var(--cursor-halo-width) solid var(--cursor-halo-color);
+
+  border-radius: 50%;
+
+  background: transparent;
+
+  pointer-events: none;
+}
+
+/*
+ * ==========================================================
+ * Click animation
+ * ==========================================================
+ */
+
+.cursor.click {
+  animation: cursor-click 500ms ease-out;
+}
+
+.cursor.click::after {
+  animation: cursor-click-halo 500ms ease-out;
+}
+
+@keyframes cursor-click {
+  0% {
+    scale: 1;
+  }
+
+  35% {
+    scale: 0.88;
+  }
+
+  100% {
+    scale: 1;
+  }
+}
+
+@keyframes cursor-click-halo {
+  0% {
+    scale: 0.9;
+    opacity: 1;
+  }
+
+  100% {
+    scale: 1.45;
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cursor.click,
+  .cursor.click::after {
+    animation: none;
+  }
+}
