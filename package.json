@@ -1,0 +1,43 @@
+{
+  "name": "@moyarich/vscode-dev-toolkit",
+  "version": "0.1.0",
+  "description": "Reusable development, demo, recording, packaging, and publishing tools for VS Code extensions.",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.mjs",
+    "./demo": "./src/demo/index.mjs",
+    "./extension": "./src/extension/index.mjs"
+  },
+  "files": [
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
+  "dependencies": {
+    "@vscode/test-electron": "^3.1.0",
+    "@vscode/vsce": "^4.0.0",
+    "ovsx": "^1.2.0",
+    "playwright-core": "1.63.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/moyarich/vscode-dev-toolkit.git"
+  },
+  "bugs": {
+    "url": "https://github.com/moyarich/vscode-dev-toolkit/issues"
+  },
+  "homepage": "https://github.com/moyarich/vscode-dev-toolkit#readme",
+  "keywords": [
+    "vscode",
+    "extension",
+    "development",
+    "playwright",
+    "demo",
+    "vsix",
+    "openvsx"
+  ],
+  "engines": {
+    "node": "^22.13.0 || >=24"
+  }
+}
