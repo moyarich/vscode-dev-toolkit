@@ -1,0 +1,16 @@
+{
+  "sources": [
+    {
+      "id": "docs",
+      "label": "Documentation",
+      "base": "../../docs",
+      "include": ".md"
+    },
+    {
+      "id": "examples",
+      "label": "Examples",
+      "base": "../../examples",
+      "include": ".html"
+    }
+  ]
+}
