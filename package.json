@@ -11,7 +11,9 @@
     "test": "node --test tests/*.test.mjs",
     "check": "npm test && npm run pack:check",
     "pack:check": "npm pack --workspace @moyarich/vscode-dev-toolkit --dry-run",
-    "pack:toolkit": "npm pack --workspace @moyarich/vscode-dev-toolkit"
+    "pack:toolkit": "npm pack --workspace @moyarich/vscode-dev-toolkit",
+    "dev": "npm run dev --workspace @moyarich/vscode-dev-toolkit-playground",
+    "build:playground": "npm run build --workspace @moyarich/vscode-dev-toolkit-playground"
   },
   "engines": {
     "node": "^22.13.0 || >=24"
