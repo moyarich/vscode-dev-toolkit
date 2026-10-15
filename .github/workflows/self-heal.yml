@@ -1,0 +1,88 @@
+name: Self-heal
+
+on:
+  push:
+  workflow_dispatch:
+
+permissions:
+  actions: write
+  contents: write
+  packages: read
+
+concurrency:
+  group: self-heal-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  prettier:
+    needs: package-lock
+    uses: moyarich/reusable-workflows/.github/workflows/reusable_prettier.yml@main
+    with:
+      mode: fix
+      prettier-config: this-repository
+      commit: true
+      node-version: "24"
+
+  package-lock:
+    uses: moyarich/reusable-workflows/.github/workflows/reusable_npm-package-lock.yml@main
+    with:
+      commit: true
+      node-version: "24"
+    secrets:
+      package-token: ${{ secrets._GITHUB_TOKEN }}
+
+  cli-dist:
+    name: Build CLI dist
+    needs: prettier
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.ref_name }}
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "24"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Build CLI distribution
+        run: npm run build
+
+      - name: Commit generated dist
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [ -z "$(git status --porcelain -- dist/bin/)" ]; then
+            echo "CLI dist is already current."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f dist/bin/
+          git commit -m "build: update CLI dist"
+          git push
+
+  validate-healed-head:
+    name: Validate healed head
+    needs: cli-dist
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Dispatch CI for healed branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TARGET_REF: ${{ github.ref_name }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh workflow run ci.yml --repo "${{ github.repository }}" --ref "$TARGET_REF"
+          echo "Dispatched CI for healed head on $TARGET_REF."

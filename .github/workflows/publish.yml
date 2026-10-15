@@ -1,0 +1,93 @@
+name: Publish
+
+run-name: >-
+  Publish · ${{ inputs.package }} · ${{ inputs.registry }} · dry-run=${{ inputs.dry-run }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      package:
+        description: Package selector
+        required: true
+        default: "."
+        type: string
+      version-mode:
+        description: Version mode
+        required: true
+        default: package-json
+        type: choice
+        options:
+          - package-json
+          - exact
+      exact-version:
+        description: Exact version when version-mode is exact
+        required: false
+        default: ""
+        type: string
+      registry:
+        description: Package registry
+        required: true
+        default: npm
+        type: choice
+        options:
+          - github
+          - npm
+          - all
+      tag:
+        description: Distribution tag; leave empty to use the suggested tag.
+        required: false
+        default: ""
+        type: string
+      dry-run:
+        description: Preview without registry mutation
+        required: true
+        default: true
+        type: boolean
+
+permissions: {}
+
+jobs:
+  validate-publish-ref:
+    name: Validate publishing branch
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require main for real publishing
+        env:
+          DRY_RUN: ${{ inputs.dry-run }}
+          TARGET_BRANCH: ${{ github.ref_name }}
+        run: |
+          if [[ "$DRY_RUN" == "false" && "$TARGET_BRANCH" != "main" ]]; then
+            echo "::error::Real publishing must run from main."
+            exit 1
+          fi
+
+  dispatch-input-summary:
+    name: "job: Workflow parameters"
+    permissions:
+      contents: read
+    uses: moyarich/reusable-workflows/.github/workflows/reusable_dispatch-input-summary.yml@main
+    with:
+      parameters-json: ${{ toJSON(inputs) }}
+      heading: "publish · Dispatch parameters"
+
+  publish:
+    needs: [validate-publish-ref, dispatch-input-summary]
+    permissions:
+      contents: write
+      packages: write
+      attestations: write
+      id-token: write
+    uses: moyarich/reusable-workflows/.github/workflows/reusable_npm-publish.yml@main
+    with:
+      target-branch: ${{ github.ref_name }}
+      package-directory: ${{ inputs.package }}
+      version-mode: ${{ inputs.version-mode }}
+      exact-version: ${{ inputs.exact-version }}
+      registry: ${{ inputs.registry }}
+      tag: ${{ inputs.tag }}
+      dry-run: ${{ inputs.dry-run }}
+      verify-git-tag: true
+      node-version: "24"
+      workspace-tools-source: checkout:current
+    secrets:
+      npm-token: ${{ secrets._NPM_TOKEN }}
