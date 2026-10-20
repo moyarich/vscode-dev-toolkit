@@ -12,6 +12,16 @@ permissions:
   packages: read
 
 jobs:
+  lint-workflows:
+    name: Validate GitHub Actions syntax
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Actionlint
+        run: docker run --rm -v "$PWD:/repo" -w /repo rhysd/actionlint:1.7.7 -color -shellcheck=
+
   check-dist:
     name: Check committed CLI distribution
     uses: moyarich/reusable-workflows/.github/workflows/reusable_check-dist.yml@main
