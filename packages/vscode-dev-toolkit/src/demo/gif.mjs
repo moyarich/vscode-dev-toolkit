@@ -1,8 +1,4 @@
-import {
-  access,
-  mkdir,
-  readdir,
-} from "node:fs/promises";
+import { access, mkdir, readdir } from "node:fs/promises";
 import path from "node:path";
 import { resolveProjectPath } from "../config.mjs";
 import { runProcess } from "../process.mjs";
@@ -13,9 +9,7 @@ import { ensureVideoEncoder } from "./video-recorder.mjs";
 function positiveNumber({ value, fallback, minimum }) {
   const parsed = Number(value ?? fallback);
 
-  return Number.isFinite(parsed)
-    ? Math.max(minimum, parsed)
-    : fallback;
+  return Number.isFinite(parsed) ? Math.max(minimum, parsed) : fallback;
 }
 
 async function exists(filePath) {
@@ -70,8 +64,7 @@ export async function createReadmeGifs({
   await mkdir(artifactsDirectory, { recursive: true });
   await mkdir(mediaDirectory, { recursive: true });
 
-  const { selectScenarios } =
-    await createScenarioRegistry({ config });
+  const { selectScenarios } = await createScenarioRegistry({ config });
   const requested = new Set(selectScenarios(selection));
   const entries = await readdir(artifactsDirectory, {
     withFileTypes: true,
@@ -102,10 +95,7 @@ export async function createReadmeGifs({
       continue;
     }
 
-    const destination = path.join(
-      mediaDirectory,
-      `${entry.name}.gif`,
-    );
+    const destination = path.join(mediaDirectory, `${entry.name}.gif`);
 
     await runProcess("ffmpeg", [
       "-y",
@@ -124,10 +114,7 @@ export async function createReadmeGifs({
   }
 }
 
-export async function runGifCli({
-  config,
-  argv = process.argv.slice(2),
-}) {
+export async function runGifCli({ config, argv = process.argv.slice(2) }) {
   const selection =
     argv
       .find((argument) => argument.startsWith("--scenario="))

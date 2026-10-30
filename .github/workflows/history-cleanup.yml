@@ -6,7 +6,7 @@ on:
       path:
         description: Repository path to remove from all Git history
         required: true
-        default: ""
+        default: packages/visualize-css-colors/
         type: string
       dry_run:
         description: Analyze and verify without pushing rewritten refs
