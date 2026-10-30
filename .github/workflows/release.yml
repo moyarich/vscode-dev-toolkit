@@ -1,88 +1,99 @@
-name: Release
+name: Release package
 
 run-name: >-
-  Release · ${{ inputs.package }} · dry-run=${{ inputs.dry-run }}
+  Release · ${{ inputs.package }} · ${{ inputs.version-mode }}${{ inputs.version-mode
+  == 'bump' && format(':{0}', inputs.version-bump) || inputs.version-mode == 'exact'
+  && format(':{0}', inputs.exact-version) || '' }} · ${{ inputs.draft && 'draft' ||
+  'published' }} · dry-run=${{ inputs.dry-run }}
 
 on:
   workflow_dispatch:
     inputs:
-      package:
-        description: Package selector
-        required: true
-        default: "."
-        type: string
-      version-mode:
-        description: Version mode
-        required: true
-        default: bump
+      workspace-tools-source:
+        description: Workspace Tools CLI source for package discovery
         type: choice
+        required: true
+        default: auto
         options:
-          - bump
-          - package-json
-          - exact
+          - auto
+          - checkout:current
+          - checkout:upstream;branch:main
+          - registry:npm:latest
+      package:
+        description: Select a publishable workspace package
+        required: true
+        type: choice
+        default: all
+        options:
+          - all
+          - "packages/example"
+      version-mode:
+        description: Resolve each package version
+        type: choice
+        required: true
+        default: auto
+        options: [auto, bump, package-json, exact]
+      initial-version:
+        description: Initial release version for auto mode
+        type: string
+        required: true
+        default: "0.1.0"
       version-bump:
-        description: Version bump
+        description: SemVer increment for bump mode
+        type: choice
         required: true
         default: patch
-        type: choice
-        options:
-          - patch
-          - minor
-          - major
-          - prepatch
-          - preminor
-          - premajor
-          - prerelease
+        options: [patch, minor, major, prepatch, preminor, premajor, prerelease]
       exact-version:
-        description: Exact version when version-mode is exact
+        description: Version for exact mode (all selected packages)
+        type: string
         required: false
         default: ""
-        type: string
+      commit-version-changes:
+        description: Commit prepared versions and lockfile to the selected branch before release
+        type: boolean
+        required: true
+        default: false
+      update-major-tag:
+        description: Update package-scoped major compatibility alias
+        type: boolean
+        required: true
+        default: true
+      draft:
+        description: |
+          Prepare draft GitHub Releases
+          (disable only to explicitly finalize)
+        type: boolean
+        required: true
+        default: true
       dry-run:
-        description: Dry-run — Preview without repository or registry mutation
+        description: Validate without creating a GitHub Release, tag, or package
         required: true
         default: true
         type: boolean
 
 permissions: {}
 
+concurrency:
+  group: release-package-${{ inputs.package }}
+  cancel-in-progress: false
+
 jobs:
-  validate-release-ref:
-    name: Validate release branch
-    runs-on: ubuntu-latest
-    steps:
-      - name: Require main for a real release
-        env:
-          DRY_RUN: ${{ inputs.dry-run }}
-          TARGET_BRANCH: ${{ github.ref_name }}
-        run: |
-          if [[ "$DRY_RUN" == "false" && "$TARGET_BRANCH" != "main" ]]; then
-            echo "::error::Real releases must run from main."
-            exit 1
-          fi
-
-  dispatch-input-summary:
-    name: "job: Workflow parameters"
-    permissions:
-      contents: read
-    uses: moyarich/reusable-workflows/.github/workflows/reusable_dispatch-input-summary.yml@main
-    with:
-      parameters-json: ${{ toJSON(inputs) }}
-      heading: "release · Dispatch parameters"
-
   release:
-    needs: [validate-release-ref, dispatch-input-summary]
+    name: Release selected packages
     permissions:
+      actions: read
       contents: write
-      packages: read
-    uses: moyarich/reusable-workflows/.github/workflows/reusable_npm-release.yml@main
+      pull-requests: read
+    uses: moyarich/reusable-workflows/.github/workflows/reusable_workspace-package-release.yml@main
     with:
-      show-input-summary: false
-      target-branch: ${{ github.ref_name }}
+      workspace-tools-source: ${{ inputs.workspace-tools-source }}
       package: ${{ inputs.package }}
       version-mode: ${{ inputs.version-mode }}
+      initial-version: ${{ inputs.initial-version }}
       version-bump: ${{ inputs.version-bump }}
       exact-version: ${{ inputs.exact-version }}
+      commit-version-changes: ${{ inputs.commit-version-changes }}
+      update-major-tag: ${{ inputs.update-major-tag }}
+      draft: ${{ inputs.draft }}
       dry-run: ${{ inputs.dry-run }}
-      node-version: "24"
-      workspace-tools-source: checkout:current

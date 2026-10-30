@@ -1,16 +1,30 @@
 name: Release Draft
 
 run-name: >-
-  Release draft · ${{ github.event_name == 'workflow_dispatch' && inputs.package || 'changed' }}
+  Release draft · ${{ github.event_name == 'workflow_dispatch' && inputs.package ||
+  'changed' }}
 
 on:
   workflow_dispatch:
     inputs:
-      package:
-        description: Package selector (all, package name, ".", or any workspace directory)
+      workspace-tools-source:
+        description: Workspace Tools CLI source for package discovery
+        type: choice
         required: true
+        default: auto
+        options:
+          - auto
+          - checkout:current
+          - checkout:upstream;branch:main
+          - registry:npm:latest
+      package:
+        description: Select a publishable workspace package
+        required: true
+        type: choice
         default: all
-        type: string
+        options:
+          - all
+          - packages/example
       version-mode:
         description: Version mode
         required: true
@@ -44,10 +58,6 @@ on:
         default: true
         type: boolean
 
-  push:
-    branches:
-      - main
-
 permissions: {}
 
 jobs:
@@ -65,13 +75,14 @@ jobs:
     name: Discover publishable packages
     permissions:
       contents: read
+      packages: read
     uses: moyarich/reusable-workflows/.github/workflows/reusable_discover-packages.yml@main
     with:
       packages-directory: packages
       use-workspaces: true
-      include-root-package: true
-      require-publish-config: true
-      workspace-tools-source: checkout:current
+      include-root-package: false
+      require-publish-config: false
+      workspace-tools-source: ${{ inputs.workspace-tools-source || 'auto' }}
 
   select-packages:
     name: Select packages for drafting
@@ -82,7 +93,8 @@ jobs:
     with:
       packages-json: ${{ needs.discover-packages.outputs.packages }}
       ignored-paths-json: '[".github/workflows/release-draft.yml"]'
-      package: ${{ github.event_name == 'workflow_dispatch' && inputs.package || 'all' }}
+      package: ${{ github.event_name == 'workflow_dispatch' && inputs.package ||
+        'all' }}
       event-name: ${{ github.event_name }}
       before-sha: ${{ github.event.before || '' }}
       after-sha: ${{ github.sha }}
@@ -103,7 +115,8 @@ jobs:
           needs.select-packages.outputs.has-packages == 'true' }}
     strategy:
       fail-fast: false
-      matrix: ${{ fromJSON(needs.select-packages.outputs.matrix || '{"include":[]}') }}
+      matrix: ${{ fromJSON(needs.select-packages.outputs.matrix ||
+        '{"include":[]}') }}
     concurrency:
       group: draft-package-${{ github.repository }}-${{ matrix.directory }}
       cancel-in-progress: true
@@ -119,10 +132,9 @@ jobs:
       version-bump: ${{ needs.select-packages.outputs.version-bump }}
       exact-version: ${{ needs.select-packages.outputs.exact-version }}
       release-tag: ""
-      tag-prefix: ${{ matrix.directory == '.' && format('{0}@', matrix.name) || format('{0}@', matrix.directory) }}
+      tag-prefix: ${{ format('{0}@', matrix.name) }}
       release-name: ${{ format('{0} v$RESOLVED_VERSION', matrix.name) }}
-      changelog-path: ${{ matrix.directory == '.' && 'CHANGELOG.md' || format('{0}/CHANGELOG.md', matrix.directory) }}
-      template-path: .github/release-drafter-package-template.yml
+      changelog-path: ${{ format('{0}/CHANGELOG.md', matrix.directory) }}
       package-name: ${{ matrix.name }}
       package-directory: ${{ matrix.directory }}
       dry-run: ${{ github.event_name == 'workflow_dispatch' && inputs.dry-run || false }}
