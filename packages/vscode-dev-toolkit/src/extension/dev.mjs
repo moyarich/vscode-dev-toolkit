@@ -1,11 +1,5 @@
 import { spawn, spawnSync } from "node:child_process";
-import {
-  copyFile,
-  mkdtemp,
-  mkdir,
-  rm,
-  writeFile,
-} from "node:fs/promises";
+import { copyFile, mkdtemp, mkdir, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { resolveProjectPath } from "../config.mjs";
@@ -20,9 +14,7 @@ export async function launchExtensionDevelopment(config) {
   }
 
   const codeCommand =
-    process.env.CODE_COMMAND ??
-    development.codeCommand ??
-    "code";
+    process.env.CODE_COMMAND ?? development.codeCommand ?? "code";
   const check = spawnSync(codeCommand, ["--version"], {
     stdio: "ignore",
   });
@@ -39,22 +31,10 @@ export async function launchExtensionDevelopment(config) {
       "vscode-extension-dev-",
     ),
   );
-  const workspaceDirectory = path.join(
-    temporaryDirectory,
-    "workspace",
-  );
-  const extensionsDirectory = path.join(
-    temporaryDirectory,
-    "extensions",
-  );
-  const userDirectory = path.join(
-    temporaryDirectory,
-    "user",
-  );
-  const settingsDirectory = path.join(
-    userDirectory,
-    "User",
-  );
+  const workspaceDirectory = path.join(temporaryDirectory, "workspace");
+  const extensionsDirectory = path.join(temporaryDirectory, "extensions");
+  const userDirectory = path.join(temporaryDirectory, "user");
+  const settingsDirectory = path.join(userDirectory, "User");
 
   try {
     await Promise.all([
@@ -63,14 +43,8 @@ export async function launchExtensionDevelopment(config) {
       mkdir(settingsDirectory, { recursive: true }),
     ]);
 
-    const fixture = resolveProjectPath(
-      config,
-      development.fixtureFile,
-    );
-    const destination = path.join(
-      workspaceDirectory,
-      path.basename(fixture),
-    );
+    const fixture = resolveProjectPath(config, development.fixtureFile);
+    const destination = path.join(workspaceDirectory, path.basename(fixture));
 
     await copyFile(fixture, destination);
     await writeFile(
@@ -86,8 +60,7 @@ export async function launchExtensionDevelopment(config) {
         ...(development.launchArgs ?? []),
         `--extensionDevelopmentPath=${resolveProjectPath(
           config,
-          config.extension.developmentPath ??
-            "dist/vscode-extension",
+          config.extension.developmentPath ?? "dist/vscode-extension",
         )}`,
         `--user-data-dir=${userDirectory}`,
         `--extensions-dir=${extensionsDirectory}`,
@@ -104,11 +77,7 @@ export async function launchExtensionDevelopment(config) {
       child.on("exit", (code) =>
         code === 0
           ? resolve()
-          : reject(
-              new Error(
-                `${codeCommand} exited with ${code}`,
-              ),
-            ),
+          : reject(new Error(`${codeCommand} exited with ${code}`)),
       );
     });
   } finally {
