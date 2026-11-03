@@ -110,9 +110,7 @@ demo overlays, packaging helpers, and publishing helpers stay in this package.
 Create `vscode-dev.config.mjs` in the consuming extension:
 
 ```js
-import {
-  defineVSCodeDevConfig,
-} from "@moyarich/vscode-dev-toolkit";
+import { defineVSCodeDevConfig } from "@moyarich/vscode-dev-toolkit";
 
 export default defineVSCodeDevConfig({
   configFile: new URL(import.meta.url),
@@ -167,18 +165,12 @@ export default defineVSCodeDevConfig({
       "telemetry.telemetryLevel": "off",
     },
 
-    launchArgs: [
-      "--new-window",
-      "--skip-welcome",
-      "--skip-release-notes",
-    ],
+    launchArgs: ["--new-window", "--skip-welcome", "--skip-release-notes"],
 
     extensionHostSetup: "demo/prepare-extension-host.mjs",
 
     async waitForReady({ page }) {
-      await page
-        .locator(".monaco-workbench")
-        .waitFor({ state: "visible" });
+      await page.locator(".monaco-workbench").waitFor({ state: "visible" });
     },
 
     async prepareCodegenPage({ page }) {
@@ -196,36 +188,36 @@ strings or URLs where supported. Relative paths are resolved from
 
 Common `extension` options:
 
-| Option | Purpose |
-| --- | --- |
-| `id` | Installed VS Code extension ID, such as `publisher.extension-name`. |
-| `developmentPath` | Staged extension directory passed to VS Code. |
-| `manifestFile` | VS Code extension manifest used while staging. |
-| `packageFile` | npm package metadata used for version validation. |
-| `artifactDirectory` | Destination for generated VSIX files. |
-| `runtimeFiles` | Files copied into the staged extension directory. |
-| `source` | Optional built-bundle-to-ESM-source generation. |
-| `dev` | Desktop development-launch settings and fixture. |
+| Option              | Purpose                                                             |
+| ------------------- | ------------------------------------------------------------------- |
+| `id`                | Installed VS Code extension ID, such as `publisher.extension-name`. |
+| `developmentPath`   | Staged extension directory passed to VS Code.                       |
+| `manifestFile`      | VS Code extension manifest used while staging.                      |
+| `packageFile`       | npm package metadata used for version validation.                   |
+| `artifactDirectory` | Destination for generated VSIX files.                               |
+| `runtimeFiles`      | Files copied into the staged extension directory.                   |
+| `source`            | Optional built-bundle-to-ESM-source generation.                     |
+| `dev`               | Desktop development-launch settings and fixture.                    |
 
 ### Demo configuration
 
 Common `demo` options:
 
-| Option | Purpose |
-| --- | --- |
-| `scenariosDirectory` | Root containing runnable scenario modules. |
-| `generatedScenariosDirectory` | Destination for Inspector-generated scenarios. |
-| `artifactsDirectory` | Screenshots, frames, and WebM recordings. |
-| `mediaDirectory` | README GIF destination. |
-| `defaultCodegenScenario` | Scenario selected when `--codegen` has no explicit selection. |
-| `frameRate` | Demo video capture frame rate. |
-| `viewport` | VS Code workbench viewport used by Playwright. |
-| `settings` | Disposable VS Code user settings for demos. |
-| `launchArgs` | Extra VS Code launch arguments. |
-| `extensionHostSetup` | Optional module run inside the VS Code extension host before recording. |
-| `waitForReady` | Optional Playwright hook that waits for extension-specific UI/readiness. |
-| `prepareCodegenPage` | Optional hook for adding stable recorder targets. |
-| `testIdAttributeName` | Recorder test-ID attribute; defaults to `data-testid`. |
+| Option                        | Purpose                                                                  |
+| ----------------------------- | ------------------------------------------------------------------------ |
+| `scenariosDirectory`          | Root containing runnable scenario modules.                               |
+| `generatedScenariosDirectory` | Destination for Inspector-generated scenarios.                           |
+| `artifactsDirectory`          | Screenshots, frames, and WebM recordings.                                |
+| `mediaDirectory`              | README GIF destination.                                                  |
+| `defaultCodegenScenario`      | Scenario selected when `--codegen` has no explicit selection.            |
+| `frameRate`                   | Demo video capture frame rate.                                           |
+| `viewport`                    | VS Code workbench viewport used by Playwright.                           |
+| `settings`                    | Disposable VS Code user settings for demos.                              |
+| `launchArgs`                  | Extra VS Code launch arguments.                                          |
+| `extensionHostSetup`          | Optional module run inside the VS Code extension host before recording.  |
+| `waitForReady`                | Optional Playwright hook that waits for extension-specific UI/readiness. |
+| `prepareCodegenPage`          | Optional hook for adding stable recorder targets.                        |
+| `testIdAttributeName`         | Recorder test-ID attribute; defaults to `data-testid`.                   |
 
 ## Self-contained scenarios
 
@@ -233,9 +225,7 @@ Scenario files remain in the consuming extension because they describe that
 extension's actual behavior.
 
 ```js
-import {
-  runScenarioModule,
-} from "@moyarich/vscode-dev-toolkit/demo";
+import { runScenarioModule } from "@moyarich/vscode-dev-toolkit/demo";
 
 import config from "../../vscode-dev.config.mjs";
 
@@ -303,16 +293,13 @@ Use the toolkit registry instead of maintaining a second hand-written scenario
 list:
 
 ```js
-import {
-  createScenarioRegistry,
-} from "@moyarich/vscode-dev-toolkit/demo";
+import { createScenarioRegistry } from "@moyarich/vscode-dev-toolkit/demo";
 
 import config from "../../vscode-dev.config.mjs";
 
-export const {
-  scenarios,
-  selectScenarios,
-} = await createScenarioRegistry({ config });
+export const { scenarios, selectScenarios } = await createScenarioRegistry({
+  config,
+});
 ```
 
 The registry recursively discovers `.mjs` files beneath
@@ -331,9 +318,7 @@ Or expose the normal demo CLI:
 
 ```js
 // demo/run.mjs
-import {
-  runDemoCli,
-} from "@moyarich/vscode-dev-toolkit/demo";
+import { runDemoCli } from "@moyarich/vscode-dev-toolkit/demo";
 
 import config from "../vscode-dev.config.mjs";
 
@@ -364,9 +349,7 @@ Generated scenarios:
 ### List or record scenarios
 
 ```js
-import {
-  runDemoCli,
-} from "@moyarich/vscode-dev-toolkit/demo";
+import { runDemoCli } from "@moyarich/vscode-dev-toolkit/demo";
 
 import config from "../vscode-dev.config.mjs";
 
@@ -385,9 +368,7 @@ node demo/run.mjs --codegen --scenario=basic
 ### Install the Playwright demo browser
 
 ```js
-import {
-  installDemoBrowser,
-} from "@moyarich/vscode-dev-toolkit/demo";
+import { installDemoBrowser } from "@moyarich/vscode-dev-toolkit/demo";
 
 await installDemoBrowser();
 ```
@@ -395,9 +376,7 @@ await installDemoBrowser();
 ### Interactive scenario chooser
 
 ```js
-import {
-  runInteractiveDemoCli,
-} from "@moyarich/vscode-dev-toolkit/demo";
+import { runInteractiveDemoCli } from "@moyarich/vscode-dev-toolkit/demo";
 
 import config from "../vscode-dev.config.mjs";
 
@@ -411,9 +390,7 @@ This workflow requires `fzf`.
 Create a thin entrypoint:
 
 ```js
-import {
-  runGifCli,
-} from "@moyarich/vscode-dev-toolkit/demo";
+import { runGifCli } from "@moyarich/vscode-dev-toolkit/demo";
 
 import config from "../vscode-dev.config.mjs";
 
@@ -450,11 +427,7 @@ Example:
 // demo/prepare-extension-host.mjs
 import assert from "node:assert/strict";
 
-export async function prepare({
-  vscode,
-  extension,
-  sourceFile,
-}) {
+export async function prepare({ vscode, extension, sourceFile }) {
   const document = await vscode.workspace.openTextDocument(
     vscode.Uri.file(sourceFile),
   );
@@ -473,9 +446,7 @@ process.
 Create a small entrypoint:
 
 ```js
-import {
-  launchExtensionDevelopment,
-} from "@moyarich/vscode-dev-toolkit/extension";
+import { launchExtensionDevelopment } from "@moyarich/vscode-dev-toolkit/extension";
 
 import config from "../vscode-dev.config.mjs";
 
@@ -489,9 +460,7 @@ staged extension.
 ## Staging a VS Code extension
 
 ```js
-import {
-  stageExtension,
-} from "@moyarich/vscode-dev-toolkit/extension";
+import { stageExtension } from "@moyarich/vscode-dev-toolkit/extension";
 
 import config from "../vscode-dev.config.mjs";
 
@@ -512,9 +481,7 @@ For browser/Monaco hosts that need the compiled extension bundle as a JavaScript
 string:
 
 ```js
-import {
-  writeExtensionSource,
-} from "@moyarich/vscode-dev-toolkit/extension";
+import { writeExtensionSource } from "@moyarich/vscode-dev-toolkit/extension";
 
 import config from "../vscode-dev.config.mjs";
 
@@ -527,9 +494,7 @@ step.
 ## Package a VSIX
 
 ```js
-import {
-  packageExtension,
-} from "@moyarich/vscode-dev-toolkit/extension";
+import { packageExtension } from "@moyarich/vscode-dev-toolkit/extension";
 
 import config from "../vscode-dev.config.mjs";
 
@@ -546,9 +511,7 @@ VSIX.
 Package first, then:
 
 ```js
-import {
-  publishOpenVSX,
-} from "@moyarich/vscode-dev-toolkit/extension";
+import { publishOpenVSX } from "@moyarich/vscode-dev-toolkit/extension";
 
 import config from "../vscode-dev.config.mjs";
 

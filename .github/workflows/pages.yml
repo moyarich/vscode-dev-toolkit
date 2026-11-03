@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - "apps/playground/**"
+      - "packages/**"
       - "docs/**"
       - "examples/**"
       - ".github/workflows/pages.yml"
@@ -15,8 +16,13 @@ on:
 
 permissions:
   contents: read
+  packages: read
   pages: write
   id-token: write
+
+concurrency:
+  group: pages-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   pages:

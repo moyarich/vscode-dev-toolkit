@@ -23,7 +23,9 @@ export async function createScenarioRegistry({ config }) {
   const entries = await Promise.all(
     files.map(async (file) => {
       const name = path.basename(file, ".mjs");
-      const module = await import(pathToFileURL(path.join(directory, file)).href);
+      const module = await import(
+        pathToFileURL(path.join(directory, file)).href
+      );
 
       return [name, module.default];
     }),

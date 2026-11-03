@@ -1,10 +1,4 @@
-import {
-  copyFile,
-  mkdir,
-  readFile,
-  rm,
-  writeFile,
-} from "node:fs/promises";
+import { copyFile, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { resolveProjectPath } from "../config.mjs";
 
@@ -13,8 +7,7 @@ export async function readExtensionManifest(config) {
     await readFile(
       resolveProjectPath(
         config,
-        config.extension.manifestFile ??
-          "extension.manifest.json",
+        config.extension.manifestFile ?? "extension.manifest.json",
       ),
       "utf8",
     ),
@@ -41,8 +34,7 @@ export async function stageExtension(config) {
 
   const extensionDirectory = resolveProjectPath(
     config,
-    config.extension.developmentPath ??
-      "dist/vscode-extension",
+    config.extension.developmentPath ?? "dist/vscode-extension",
   );
   const artifactDirectory = resolveProjectPath(
     config,
@@ -71,10 +63,7 @@ export async function stageExtension(config) {
     await mkdir(path.dirname(destination), {
       recursive: true,
     });
-    await copyFile(
-      resolveProjectPath(config, file),
-      destination,
-    );
+    await copyFile(resolveProjectPath(config, file), destination);
   }
 
   return {

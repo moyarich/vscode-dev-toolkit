@@ -43,9 +43,7 @@ export async function publishOpenVSX(
   await new Promise((resolve, reject) => {
     child.on("error", reject);
     child.on("exit", (code) =>
-      code === 0
-        ? resolve()
-        : reject(new Error(`ovsx exited with ${code}`)),
+      code === 0 ? resolve() : reject(new Error(`ovsx exited with ${code}`)),
     );
   });
 }

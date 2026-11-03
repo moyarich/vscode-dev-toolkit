@@ -81,7 +81,6 @@ export async function runInteractiveDemoCli({ config }) {
   await createReadmeGifs({
     config,
     selection,
-    record:
-      action === "Record new video, then create GIF",
+    record: action === "Record new video, then create GIF",
   });
 }
