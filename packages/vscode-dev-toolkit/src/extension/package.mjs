@@ -1,20 +1,11 @@
 import { mkdir } from "node:fs/promises";
 import path from "node:path";
-import {
-  createVSIX,
-  listFiles,
-} from "@vscode/vsce";
+import { createVSIX, listFiles } from "@vscode/vsce";
 import { stageExtension } from "./stage.mjs";
 
-export async function packageExtension(
-  config,
-  { list = false } = {},
-) {
-  const {
-    manifest,
-    extensionDirectory,
-    artifactDirectory,
-  } = await stageExtension(config);
+export async function packageExtension(config, { list = false } = {}) {
+  const { manifest, extensionDirectory, artifactDirectory } =
+    await stageExtension(config);
   const options = {
     cwd: extensionDirectory,
     dependencies: false,

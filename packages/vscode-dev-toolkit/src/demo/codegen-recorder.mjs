@@ -1,15 +1,7 @@
-import {
-  access,
-  mkdir,
-  readFile,
-  writeFile,
-} from "node:fs/promises";
+import { access, mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { createInterface } from "node:readline/promises";
-import {
-  resolveProjectPath,
-  toFilePath,
-} from "../config.mjs";
+import { resolveProjectPath, toFilePath } from "../config.mjs";
 
 function dedent(source) {
   const lines = source.replace(/^\n+|\n+$/g, "").split("\n");
@@ -123,8 +115,7 @@ export async function captureScenario({
 }) {
   const directory = resolveProjectPath(
     config,
-    config.demo?.generatedScenariosDirectory ??
-      "demo/scenarios/generated",
+    config.demo?.generatedScenariosDirectory ?? "demo/scenarios/generated",
   );
 
   await mkdir(directory, { recursive: true });
@@ -149,8 +140,7 @@ export async function captureScenario({
   await context._enableRecorder({
     language: "javascript",
     mode: "recording",
-    testIdAttributeName:
-      config.demo?.testIdAttributeName ?? "data-testid",
+    testIdAttributeName: config.demo?.testIdAttributeName ?? "data-testid",
     outputFile,
     handleSIGINT: false,
   });

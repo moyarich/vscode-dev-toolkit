@@ -13,10 +13,7 @@ import {
   encodeRecording,
   ensureVideoEncoder,
 } from "./video-recorder.mjs";
-import {
-  hideDemoCaption,
-  showDemoCaption,
-} from "./ui/caption/install.mjs";
+import { hideDemoCaption, showDemoCaption } from "./ui/caption/install.mjs";
 import {
   installDemoMagnifierCursorOverlay,
   pointDemoMagnifierCursorAt,
@@ -26,8 +23,7 @@ import {
 export function isDirectScenario(moduleUrl) {
   return Boolean(
     process.argv[1] &&
-      path.resolve(process.argv[1]) ===
-        path.resolve(fileURLToPath(moduleUrl)),
+    path.resolve(process.argv[1]) === path.resolve(fileURLToPath(moduleUrl)),
   );
 }
 
@@ -133,12 +129,7 @@ export async function runScenario({
   }
 }
 
-export async function runScenarioModule({
-  config,
-  moduleUrl,
-  name,
-  scenario,
-}) {
+export async function runScenarioModule({ config, moduleUrl, name, scenario }) {
   if (!isDirectScenario(moduleUrl)) {
     return;
   }

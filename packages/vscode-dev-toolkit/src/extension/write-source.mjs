@@ -1,7 +1,4 @@
-import {
-  readFile,
-  writeFile,
-} from "node:fs/promises";
+import { readFile, writeFile } from "node:fs/promises";
 import { resolveProjectPath } from "../config.mjs";
 
 export async function writeExtensionSource(config) {

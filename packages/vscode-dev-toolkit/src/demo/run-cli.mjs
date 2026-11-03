@@ -1,16 +1,14 @@
 import { createScenarioRegistry } from "./scenarios.mjs";
-import {
-  prepareDemoRuntime,
-  runScenario,
-} from "./run-scenario.mjs";
+import { prepareDemoRuntime, runScenario } from "./run-scenario.mjs";
 
 export async function runSelectedScenarios({
   config,
   selection = "all",
   codegen = false,
 }) {
-  const { scenarios, selectScenarios } =
-    await createScenarioRegistry({ config });
+  const { scenarios, selectScenarios } = await createScenarioRegistry({
+    config,
+  });
   const selected = selectScenarios(selection);
   const executable = await prepareDemoRuntime({
     config,
@@ -28,27 +26,21 @@ export async function runSelectedScenarios({
   }
 }
 
-export async function runDemoCli({
-  config,
-  argv = process.argv.slice(2),
-}) {
-  const { scenarios, selectScenarios } =
-    await createScenarioRegistry({ config });
+export async function runDemoCli({ config, argv = process.argv.slice(2) }) {
+  const { scenarios, selectScenarios } = await createScenarioRegistry({
+    config,
+  });
   const codegen = argv.includes("--codegen");
   const selection =
     argv
       .find((argument) => argument.startsWith("--scenario="))
       ?.slice("--scenario=".length) ??
-    (codegen
-      ? config.demo?.defaultCodegenScenario ?? "all"
-      : "all");
+    (codegen ? (config.demo?.defaultCodegenScenario ?? "all") : "all");
   const selected = selectScenarios(selection);
 
   if (argv.includes("--list")) {
     for (const [name, scenario] of Object.entries(scenarios)) {
-      console.log(
-        `${name}: ${scenario.title ?? scenario.description ?? ""}`,
-      );
+      console.log(`${name}: ${scenario.title ?? scenario.description ?? ""}`);
     }
 
     return;
